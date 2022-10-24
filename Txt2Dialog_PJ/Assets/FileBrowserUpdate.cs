@@ -1,15 +1,37 @@
 ﻿
+using System;
 using AnotherFileBrowser.Windows;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+using Doublsb.Dialog;
 using UnityEngine;
-using UnityEngine.Networking;
 using UnityEngine.UI;
 
 public class FileBrowserUpdate : MonoBehaviour
 {
-    public RawImage rawImage;
+    public Tester_sc gameManager;
+    public String_sc txtReader;
+    string[] txt = null;
+    string sDialog;
+    public Text textPreview;
+    public Button btnShowDialog;
+    public Button btnLoadTxt;
 
+    private void Start()
+    {
+        btnShowDialog.onClick.AddListener(ShowEffect);
+        btnLoadTxt.onClick.AddListener(OpenFileBrowser);
+    }
+
+    void ShowEffect()
+    {
+        if (txt.Length==1&&txt[0]=="")
+        {
+            return;
+        }
+        txtReader.ReadAndTransform(txt);
+    }
     public void OpenFileBrowser()
     {
         var bp = new BrowserProperties();
@@ -19,25 +41,16 @@ public class FileBrowserUpdate : MonoBehaviour
         new FileBrowser().OpenFileBrowser(bp, path =>
         {
             //Load image from local path with UWR
-            StartCoroutine(LoadImage(path));
+            StartCoroutine(CoLoadTxt(path));
+
         });
     }
 
-    IEnumerator LoadImage(string path)
+    IEnumerator CoLoadTxt(string path)
     {
-        using (UnityWebRequest uwr = UnityWebRequestTexture.GetTexture(path))
-        {
-            yield return uwr.SendWebRequest();
-
-            if (uwr.isNetworkError || uwr.isHttpError)
-            {
-                Debug.Log(uwr.error);
-            }
-            else
-            {
-                var uwrTexture = DownloadHandlerTexture.GetContent(uwr);
-                rawImage.texture = uwrTexture;
-            }
-        }
+        sDialog = File.ReadAllText(path);
+        textPreview.text = sDialog;
+        txt = sDialog.Split('\n');
+        yield return null;
     }
 }

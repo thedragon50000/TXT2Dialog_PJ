@@ -11,9 +11,8 @@ public class String_sc : MonoBehaviour
     public string[] strArrayTemp;
     // public string[] strArrayTranformed;
 
-    public Tester_sc GameManager;
+    public Tester_sc gameManager;
     public TextAsset txt;
-    public DialogManager DialogManager;
 
 
     //"內文&指令","角色名"
@@ -28,19 +27,35 @@ public class String_sc : MonoBehaviour
         }
     }
 
-    void Start()
+    public void ReadAndTransform(string[] txt)
     {
-        var temp = Add2DialogList(TxtTransform(strArrayTemp));
+        gameManager.fileUploadingCanvas.SetActive(false);
+        
+        if (txt == null)
+        {
+            return;
+        }
+
+        if (txt.Length == 1 || txt[0] == "")
+        {
+            return;
+        }
+
+
+        // var temp = Add2DialogList(TxtTransform(strArrayTemp));
+        var temp = Add2DialogList(TxtTransform(txt));
 
         // print(strArrayTemp[0].TrimEnd().TrimEnd(']')); //讀取文件時每一段換行都留有空白?先消除空白才能消除中括號
 
-        temp.Add(new DialogData("/speed:0//close/", "", GameManager.EnddingDialogue, true));
+        temp.Add(new DialogData("/speed:0//close/", "", gameManager.EnddingDialogue, true));
 
         ActionAdd(temp, new[] {1, 2}, new UnityAction[] {() => print("添加action1"), () => print("添加action2")});
 
         ActionAdd(temp, 2, () => print("第二句再多加一個action3"));
+        
+        ActionAdd(temp,temp.Count,()=>gameManager.fileUploadingCanvas.SetActive(true));
 
-        GameManager.DialogueShow(temp);
+        gameManager.DialogueShow(temp);
 
         // DialogManager.Show(temp);
         // for (int i = 0; i < strArrayTemp.Length; i++)
@@ -55,13 +70,13 @@ public class String_sc : MonoBehaviour
 
         foreach (int i in iDialogAction)
         {
-            if (i>temp.Count)
+            if (i > temp.Count)
             {
                 print("錯誤，指定的位置超出對話總數");
                 return;
             }
         }
-            
+
         foreach (int i in iDialogAction)
         {
             itemp++;
@@ -71,29 +86,32 @@ public class String_sc : MonoBehaviour
 
     private void ActionAdd(List<DialogData> temp, int iDialogAction, UnityAction action)
     {
-        if (iDialogAction>temp.Count)
+        if (iDialogAction > temp.Count)
         {
             print("錯誤，指定的位置超出對話總數");
             return;
         }
+
         temp[iDialogAction - 1].Callback = action;
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-    }
 
     string[,] TxtTransform(string[] strArray)
     {
+        print("strArray.Length:" + strArray.Length);
+        if (strArray.Length == 1 && strArray[0] == "")
+        {
+            return null;
+        }
+
         #region 先確定有幾個對話框
 
         int index = -1;
 
         for (int i = 0; i < strArray.Length; i++)
         {
-            if (CheckSpeaker(strArray[i]) == E_Character.統神.ToString()
-                || CheckSpeaker(strArray[i]) == E_Character.國棟.ToString())
+            if (CheckSpeaker(strArray[i]) == E_Character.Padko.ToString()
+                || CheckSpeaker(strArray[i]) == E_Character.Me.ToString())
             {
                 print(CheckSpeaker(strArray[i]) + "是統神或國棟");
                 index++;
@@ -113,16 +131,16 @@ public class String_sc : MonoBehaviour
 
         for (int i = 0; i < strArray.Length; i++)
         {
-            if (CheckSpeaker(strArray[i]) == E_Character.統神.ToString()
-                || CheckSpeaker(strArray[i]) == E_Character.國棟.ToString())
+            if (CheckSpeaker(strArray[i]) == E_Character.Padko.ToString()
+                || CheckSpeaker(strArray[i]) == E_Character.Me.ToString())
             {
                 index++;
                 str[index, 1] = CheckSpeaker(strArray[i]); //記住說話者
                 print($"第{index}個對話的說話者:" + strArray[i]);
             }
 
-            else if (CheckSpeaker(strArray[i]) != E_Character.統神.ToString()
-                     && CheckSpeaker(strArray[i]) != E_Character.國棟.ToString())
+            else if (CheckSpeaker(strArray[i]) != E_Character.Padko.ToString()
+                     && CheckSpeaker(strArray[i]) != E_Character.Me.ToString())
             {
                 print(strArray[i]);
                 str[index, 0] += strArray[i]; //一段台詞
@@ -145,6 +163,11 @@ public class String_sc : MonoBehaviour
 
     private List<DialogData> Add2DialogList(string[,] str)
     {
+        if (str.Length == 0)
+        {
+            return null;
+        }
+
         List<DialogData> dialog = new List<DialogData>();
         for (int i = 0; i < str.GetLength(0); i++)
         {
@@ -159,14 +182,14 @@ public class String_sc : MonoBehaviour
     {
         for (int i = 0; i < s.GetLength(0); i++)
         {
-            if (s[i, 1] == E_Character.國棟.ToString())
+            if (s[i, 1] == E_Character.Me.ToString())
             {
-                s[i, 1] = "dong";
+                s[i, 1] = E_Character.Me.ToString();
             }
 
-            if (s[i, 1] == E_Character.統神.ToString())
+            if (s[i, 1] == E_Character.Padko.ToString())
             {
-                s[i, 1] = "tong";
+                s[i, 1] = E_Character.Padko.ToString();
             }
         }
     }
@@ -193,6 +216,6 @@ public class String_sc : MonoBehaviour
 
 public enum E_Character
 {
-    統神,
-    國棟
+    Padko,
+    Me
 }

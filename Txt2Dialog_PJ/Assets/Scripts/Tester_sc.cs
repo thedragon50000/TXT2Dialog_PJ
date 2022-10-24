@@ -10,6 +10,7 @@ public class Tester_sc : MonoBehaviour
     public DialogManager DialogManager;
     public bool bIsTalking = false;
     public CommandManager cmd = new CommandManager();
+    public GameObject fileUploadingCanvas;
 
     public void EnddingDialogue()
     {
